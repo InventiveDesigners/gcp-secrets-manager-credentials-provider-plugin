@@ -7,10 +7,8 @@ import com.google.cloud.secretmanager.v1.ListSecretsRequest.Builder;
 import com.google.cloud.secretmanager.v1.ProjectName;
 import com.google.cloud.secretmanager.v1.Secret;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
-import io.jenkins.plugins.credentials.gcp.secretsmanager.config.Filter;
 import io.jenkins.plugins.credentials.gcp.secretsmanager.config.Messages;
-import io.jenkins.plugins.credentials.gcp.secretsmanager.config.PluginConfiguration;
-import io.jenkins.plugins.credentials.gcp.secretsmanager.config.ServerSideFilter;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,24 +24,22 @@ public class CredentialsSupplier implements Supplier<Collection<StandardCredenti
 
   private static final String DEFAULT_FILTER = "labels.jenkins-credentials-type:*";
 
-  public static Supplier<Collection<StandardCredentials>> standard() {
-    return new CredentialsSupplier();
+  private final FilterProperty additionalFilter;
+
+  public CredentialsSupplier(FilterProperty additionalFilter) {
+    this.additionalFilter = additionalFilter;
+  }
+
+  public static Supplier<Collection<StandardCredentials>> standard(FilterProperty additionalFilter) {
+    return new CredentialsSupplier(additionalFilter);
   }
 
   @Override
   public Collection<StandardCredentials> get() {
-    PluginConfiguration configuration = PluginConfiguration.getInstance();
-    String project = configuration.getProject();
-    Filter filter = configuration.getFilter();
-    ServerSideFilter serverSideFilter = configuration.getServerSideFilter();
-
+    String project = additionalFilter.getProject();
     String[] projectIds;
-    String[] filters = new String[0];
     String fullServerSideFilter = DEFAULT_FILTER;
 
-    if (filter != null && filter.getValue() != null) {
-      filters = filter.getValue().split(",");
-    }
 
     if (project == null || "".equals(project)) {
       return Collections.emptyList();
@@ -58,11 +54,14 @@ public class CredentialsSupplier implements Supplier<Collection<StandardCredenti
 
         ListSecretsRequest listSecretsRequest;
 
-        Builder builder =
-            ListSecretsRequest.newBuilder().setParent(ProjectName.of(projectId).toString());
+        Builder builder = ListSecretsRequest.newBuilder().setParent(ProjectName.of(projectId).toString());
 
-        if (serverSideFilter != null && serverSideFilter.getFilter() != null) {
-          fullServerSideFilter += " AND (" + serverSideFilter.getFilter() + ")";
+        if (!additionalFilter.isExclusive() && additionalFilter.getServerFilter() != null && !additionalFilter.getServerFilter().isEmpty()) {
+          fullServerSideFilter += " AND (" + additionalFilter.getServerFilter() + ")";
+        }
+
+        if(additionalFilter.getAdditionalFilter() != null && !additionalFilter.getAdditionalFilter().isEmpty()) {
+          fullServerSideFilter += " AND (" + additionalFilter.getAdditionalFilter() + ")";
         }
 
         LOGGER.info(
@@ -76,24 +75,6 @@ public class CredentialsSupplier implements Supplier<Collection<StandardCredenti
 
         for (Secret secret : secrets.iterateAll()) {
           Map<String, String> labelsMap = secret.getLabelsMap();
-
-          if (filter != null && filter.getLabel() != null && filter.getValue() != null) {
-            final String matchingLabel = filter.getLabel();
-
-            if (labelsMap.containsKey(matchingLabel)) {
-              final String labelValue = labelsMap.get(matchingLabel);
-
-              if (!matchesLabel(labelValue, filters)) {
-                LOGGER.info(
-                    String.format("Secret %s does not match provided filter", secret.getName()));
-                continue;
-              }
-            } else {
-              LOGGER.info(
-                  String.format("Secret %s does not match provided filter", secret.getName()));
-              continue;
-            }
-          }
 
           if (labelsMap.containsKey(Labels.TYPE.toLowerCase())) {
             final String secretName = secret.getName();

@@ -1,8 +1,5 @@
 unclassified:
   gcpCredentialsProvider:
-    filter:
-      label: "my-label"
-      value: "my-value"
     serverSideFilter:
       filter: "name:mysecret"
     project: "gcp-project"

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.48</version>
+        <version>4.79</version>
         <relativePath />
     </parent>
 
@@ -47,8 +47,8 @@
     </scm>
 
     <properties>
-        <jenkins.version>2.346.3</jenkins.version>
-        <java.level>11</java.level>
+        <jenkins.version>2.426.3</jenkins.version>
+        <java.level>17</java.level>
         <spotless.version>2.27.1</spotless.version>
     </properties>
 
@@ -56,15 +56,15 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.346.x</artifactId>
-                <version>1607.va_c1576527071</version>
+                <artifactId>bom-2.426.x</artifactId>
+                <version>2857.v01a_0144eb_20b_</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>com.google.cloud</groupId>
                 <artifactId>libraries-bom</artifactId>
-                <version>26.1.2</version>
+                <version>26.18.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -91,8 +91,11 @@
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>cloudbees-folder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>variant</artifactId>
-            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>

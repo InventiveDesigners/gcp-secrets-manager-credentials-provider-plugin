@@ -12,7 +12,6 @@ import org.kohsuke.stapler.StaplerRequest;
 public class PluginConfiguration extends GlobalConfiguration {
 
   private String project;
-  private Filter filter;
   private ServerSideFilter serverSideFilter;
 
   public PluginConfiguration() {
@@ -34,17 +33,6 @@ public class PluginConfiguration extends GlobalConfiguration {
     save();
   }
 
-  public Filter getFilter() {
-    return filter;
-  }
-
-  @DataBoundSetter
-  @SuppressWarnings("unused")
-  public void setFilter(Filter filter) {
-    this.filter = filter;
-    save();
-  }
-
   public ServerSideFilter getServerSideFilter() {
     return serverSideFilter;
   }
@@ -59,7 +47,6 @@ public class PluginConfiguration extends GlobalConfiguration {
   @Override
   public synchronized boolean configure(StaplerRequest req, JSONObject json) {
     this.project = null;
-    this.filter = null;
     this.serverSideFilter = null;
 
     req.bindJSON(this, json);

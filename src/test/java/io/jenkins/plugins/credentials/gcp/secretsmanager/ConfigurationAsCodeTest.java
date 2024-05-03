@@ -18,7 +18,5 @@ public class ConfigurationAsCodeTest {
     PluginConfiguration configuration =
         (PluginConfiguration) r.jenkins.getDescriptor(PluginConfiguration.class);
     assertThat(configuration.getProject()).isEqualTo("gcp-project");
-    assertThat(configuration.getFilter().getLabel()).isEqualTo("my-label");
-    assertThat(configuration.getFilter().getValue()).isEqualTo("my-value");
   }
 }
